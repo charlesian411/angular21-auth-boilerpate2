@@ -111,7 +111,7 @@ app.post('/accounts/register', (req, res) => {
 	account.role = account.id === 1 ? Role.Admin : Role.User;
 	account.dateCreated = nowIso();
 	account.verificationToken = Date.now().toString();
-	account.isVerified = false;
+	account.isVerified = true;
 	account.refreshTokens = [];
 	delete account.confirmPassword;
 
