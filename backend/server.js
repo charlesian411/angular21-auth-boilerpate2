@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const nodemailer = require('nodemailer');
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -16,28 +15,6 @@ app.use(cors({
 	credentials: true
 }));
 
-let mailer = null;
-
-async function initMailer() {
-	const account = await nodemailer.createTestAccount();
-	mailer = {
-		from: 'Auth Boilerplate <no-reply@example.com>',
-		transporter: nodemailer.createTransport({
-			host: account.smtp.host,
-			port: account.smtp.port,
-			secure: account.smtp.secure,
-			auth: {
-				user: account.user,
-				pass: account.pass
-			}
-		})
-	};
-	console.log('Ethereal user:', account.user);
-}
-
-initMailer().catch((error) => {
-	console.error('Failed to init mailer:', error);
-});
 
 // In-memory data store for demo/dev only.
 const accounts = [];
@@ -82,20 +59,6 @@ function getRefreshToken(req) {
 	return req.cookies.fakeRefreshToken;
 }
 
-async function sendVerificationEmail(account) {
-	if (!mailer) return null;
-
-	const verifyUrl = `${frontendUrl}/account/verify-email?token=${account.verificationToken}`;
-	const info = await mailer.transporter.sendMail({
-		from: mailer.from,
-		to: account.email,
-		subject: 'Verify your email',
-		text: `Verify your email: ${verifyUrl}`,
-		html: `<p>Please verify your email:</p><p><a href="${verifyUrl}">${verifyUrl}</a></p>`
-	});
-
-	return nodemailer.getTestMessageUrl(info);
-}
 
 function basicDetails(account) {
 	const { id, title, firstName, lastName, email, role, dateCreated, isVerified } = account;
@@ -150,35 +113,15 @@ app.post('/accounts/register', async (req, res) => {
 	account.id = newId();
 	account.role = account.id === 1 ? Role.Admin : Role.User;
 	account.dateCreated = nowIso();
-	account.verificationToken = Date.now().toString();
-	account.isVerified = false;
+	account.isVerified = true;
 	account.refreshTokens = [];
 	delete account.confirmPassword;
 
 	accounts.push(account);
-	let previewUrl = null;
-	try {
-		previewUrl = await sendVerificationEmail(account);
-	} catch (error) {
-		console.error('Failed to send verification email:', error);
-	}
 
 	return res.json({
-		message: 'Registration successful. Check your email to verify.',
-		verificationToken: account.verificationToken,
-		previewUrl
+		message: 'Registration successful.'
 	});
-});
-
-app.post('/accounts/verify-email', (req, res) => {
-	const { token } = req.body;
-	const account = accounts.find((x) => x.verificationToken === token);
-	if (!account) {
-		return res.status(400).json({ message: 'Verification failed' });
-	}
-	account.isVerified = true;
-	delete account.verificationToken;
-	return res.json({ message: 'Email verified' });
 });
 
 app.post('/accounts/authenticate', (req, res) => {
