@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const swaggerUi = require('swagger-ui-express');
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -9,11 +10,283 @@ app.use(express.json());
 app.use(cookieParser());
 
 const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:4200';
-const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
 app.use(cors({
 	origin: corsOrigin,
 	credentials: true
 }));
+
+const swaggerSpec = {
+	openapi: '3.0.0',
+	info: {
+		title: 'Angular Auth API',
+		version: '1.0.0',
+		description: 'Demo authentication API for the Angular app.'
+	},
+	servers: [
+		{
+			url: process.env.PUBLIC_URL || `http://localhost:${port}`
+		}
+	],
+	components: {
+		securitySchemes: {
+			bearerAuth: {
+				type: 'http',
+				scheme: 'bearer',
+				bearerFormat: 'JWT'
+			}
+		},
+		schemas: {
+			RegisterRequest: {
+				type: 'object',
+				required: ['title', 'firstName', 'lastName', 'email', 'password', 'confirmPassword'],
+				properties: {
+					title: { type: 'string' },
+					firstName: { type: 'string' },
+					lastName: { type: 'string' },
+					email: { type: 'string', format: 'email' },
+					password: { type: 'string', format: 'password' },
+					confirmPassword: { type: 'string', format: 'password' }
+				}
+			},
+			AuthRequest: {
+				type: 'object',
+				required: ['email', 'password'],
+				properties: {
+					email: { type: 'string', format: 'email' },
+					password: { type: 'string', format: 'password' }
+				}
+			},
+			ResetRequest: {
+				type: 'object',
+				required: ['token', 'password'],
+				properties: {
+					token: { type: 'string' },
+					password: { type: 'string', format: 'password' }
+				}
+			},
+			TokenRequest: {
+				type: 'object',
+				required: ['token'],
+				properties: {
+					token: { type: 'string' }
+				}
+			},
+			Account: {
+				type: 'object',
+				properties: {
+					id: { type: 'integer' },
+					title: { type: 'string' },
+					firstName: { type: 'string' },
+					lastName: { type: 'string' },
+					email: { type: 'string', format: 'email' },
+					role: { type: 'string' },
+					dateCreated: { type: 'string', format: 'date-time' },
+					isVerified: { type: 'boolean' }
+				}
+			}
+		}
+	},
+	paths: {
+		'/': {
+			get: {
+				summary: 'Health check',
+				responses: {
+					'200': { description: 'OK' }
+				}
+			}
+		},
+		'/accounts/register': {
+			post: {
+				summary: 'Register a new account',
+				requestBody: {
+					required: true,
+					content: {
+						'application/json': {
+							schema: { $ref: '#/components/schemas/RegisterRequest' }
+						}
+					}
+				},
+				responses: {
+					'200': { description: 'Registration successful' },
+					'400': { description: 'Email already registered' }
+				}
+			}
+		},
+		'/accounts/authenticate': {
+			post: {
+				summary: 'Authenticate a user',
+				requestBody: {
+					required: true,
+					content: {
+						'application/json': {
+							schema: { $ref: '#/components/schemas/AuthRequest' }
+						}
+					}
+				},
+				responses: {
+					'200': { description: 'Authenticated' },
+					'400': { description: 'Invalid credentials' }
+				}
+			}
+		},
+		'/accounts/refresh-token': {
+			post: {
+				summary: 'Refresh JWT using cookie',
+				responses: {
+					'200': { description: 'Token refreshed' },
+					'401': { description: 'Unauthorized' }
+				}
+			}
+		},
+		'/accounts/revoke-token': {
+			post: {
+				summary: 'Revoke refresh token',
+				security: [{ bearerAuth: [] }],
+				responses: {
+					'200': { description: 'Token revoked' },
+					'401': { description: 'Unauthorized' }
+				}
+			}
+		},
+		'/accounts/forgot-password': {
+			post: {
+				summary: 'Generate a reset token',
+				requestBody: {
+					required: true,
+					content: {
+						'application/json': {
+							schema: {
+								type: 'object',
+								required: ['email'],
+								properties: { email: { type: 'string', format: 'email' } }
+							}
+						}
+					}
+				},
+				responses: {
+					'200': { description: 'Reset token generated' }
+				}
+			}
+		},
+		'/accounts/validate-reset-token': {
+			post: {
+				summary: 'Validate reset token',
+				requestBody: {
+					required: true,
+					content: {
+						'application/json': {
+							schema: { $ref: '#/components/schemas/TokenRequest' }
+						}
+					}
+				},
+				responses: {
+					'200': { description: 'Token valid' },
+					'400': { description: 'Invalid token' }
+				}
+			}
+		},
+		'/accounts/reset-password': {
+			post: {
+				summary: 'Reset password',
+				requestBody: {
+					required: true,
+					content: {
+						'application/json': {
+							schema: { $ref: '#/components/schemas/ResetRequest' }
+						}
+					}
+				},
+				responses: {
+					'200': { description: 'Password reset' },
+					'400': { description: 'Invalid token' }
+				}
+			}
+		},
+		'/accounts': {
+			get: {
+				summary: 'List accounts (admin)',
+				security: [{ bearerAuth: [] }],
+				responses: {
+					'200': {
+						description: 'Accounts list',
+						content: {
+							'application/json': {
+								schema: {
+									type: 'array',
+									items: { $ref: '#/components/schemas/Account' }
+								}
+							}
+						}
+					},
+					'401': { description: 'Unauthorized' },
+					'403': { description: 'Forbidden' }
+				}
+			},
+			post: {
+				summary: 'Create account (admin)',
+				security: [{ bearerAuth: [] }],
+				requestBody: {
+					required: true,
+					content: {
+						'application/json': {
+							schema: { $ref: '#/components/schemas/RegisterRequest' }
+						}
+					}
+				},
+				responses: {
+					'200': { description: 'Account created' },
+					'400': { description: 'Email already registered' },
+					'403': { description: 'Forbidden' }
+				}
+			}
+		},
+		'/accounts/{id}': {
+			get: {
+				summary: 'Get account by id',
+				security: [{ bearerAuth: [] }],
+				parameters: [
+					{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }
+				],
+				responses: {
+					'200': { description: 'Account details' },
+					'404': { description: 'Account not found' }
+				}
+			},
+			put: {
+				summary: 'Update account',
+				security: [{ bearerAuth: [] }],
+				parameters: [
+					{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }
+				],
+				requestBody: {
+					required: true,
+					content: {
+						'application/json': {
+							schema: { type: 'object' }
+						}
+					}
+				},
+				responses: {
+					'200': { description: 'Account updated' },
+					'404': { description: 'Account not found' }
+				}
+			},
+			delete: {
+				summary: 'Delete account',
+				security: [{ bearerAuth: [] }],
+				parameters: [
+					{ name: 'id', in: 'path', required: true, schema: { type: 'integer' } }
+				],
+				responses: {
+					'200': { description: 'Account deleted' },
+					'404': { description: 'Account not found' }
+				}
+			}
+		}
+	}
+};
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
 // In-memory data store for demo/dev only.
