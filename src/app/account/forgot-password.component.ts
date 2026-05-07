@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first, finalize } from 'rxjs/operators';
@@ -16,7 +16,8 @@ export class ForgotPasswordComponent implements OnInit {
 		private formBuilder: FormBuilder,
 		private accountService: AccountService,
 		private alertService: AlertService,
-		private router: Router
+		private router: Router,
+		private cdr: ChangeDetectorRef
 	) { }
 
 	ngOnInit() {
@@ -30,6 +31,7 @@ export class ForgotPasswordComponent implements OnInit {
 
 	onSubmit() {
 		this.submitted = true;
+		this.cdr.detectChanges();
 		this.resetLink = null;
 
 		// reset alerts on submit
@@ -41,21 +43,30 @@ export class ForgotPasswordComponent implements OnInit {
 		}
 
 		this.loading = true;
+		this.cdr.detectChanges();
 		this.accountService.forgotPassword(this.f.email.value)
 			.pipe(first())
-			.pipe(finalize(() => this.loading = false))
+			.pipe(finalize(() => {
+				this.loading = false;
+				this.cdr.detectChanges();
+			}))
 			.subscribe({
 				next: (response: any) => {
 					const resetToken = response?.resetToken;
 					if (resetToken) {
 						this.resetLink = `${location.origin}/account/reset-password?token=${resetToken}`;
 						this.alertService.success('Reset link generated. Click the link below to continue.');
+						this.cdr.detectChanges();
 						this.router.navigate(['/account/reset-password'], { queryParams: { token: resetToken } });
 						return;
 					}
 					this.alertService.success('Please check your email for password reset instructions');
+					this.cdr.detectChanges();
 				},
-				error: error => this.alertService.error(error)
+				error: error => {
+					this.alertService.error(error);
+					this.cdr.detectChanges();
+				}
 			});
 	}
 }

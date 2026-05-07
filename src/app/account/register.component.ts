@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
@@ -17,7 +17,8 @@ export class RegisterComponent implements OnInit {
 		private route: ActivatedRoute,
 		private router: Router,
 		private accountService: AccountService,
-		private alertService: AlertService
+		private alertService: AlertService,
+		private cdr: ChangeDetectorRef
 	) { }
 
 	ngOnInit() {
@@ -39,6 +40,7 @@ export class RegisterComponent implements OnInit {
 
 	onSubmit() {
 		this.submitted = true;
+		this.cdr.detectChanges();
 
 		// reset alerts on submit
 		this.alertService.clear();
@@ -49,16 +51,19 @@ export class RegisterComponent implements OnInit {
 		}
 
 		this.submitting = true;
+		this.cdr.detectChanges();
 		this.accountService.register(this.form.value)
 			.pipe(first())
 			.subscribe({
 				next: () => {
 					this.alertService.success('Registration successful, please check your email for verification instructions', { keepAfterRouteChange: true });
+					this.cdr.detectChanges();
 					this.router.navigate(['../login'], { relativeTo: this.route });
 				},
 				error: error => {
 					this.alertService.error(error);
 					this.submitting = false;
+					this.cdr.detectChanges();
 				}
 			});
 	}
