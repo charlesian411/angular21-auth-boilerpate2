@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
@@ -6,16 +6,9 @@ import { first } from 'rxjs/operators';
 import { AccountService, AlertService } from '@app/_services';
 import { MustMatch } from '@app/_helpers';
 
-enum TokenStatus {
-	Validating,
-	Valid,
-	Invalid
-}
-
 @Component({ templateUrl: 'reset-password.component.html', standalone: false })
 export class ResetPasswordComponent implements OnInit {
-	TokenStatus = TokenStatus;
-	tokenStatus = TokenStatus.Validating;
+	tokenStatus = 'validating'; // 'validating', 'valid', 'invalid'
 	token?: string;
 	form!: FormGroup;
 	loading = false;
@@ -26,7 +19,8 @@ export class ResetPasswordComponent implements OnInit {
 		private route: ActivatedRoute,
 		private router: Router,
 		private accountService: AccountService,
-		private alertService: AlertService
+		private alertService: AlertService,
+		private cd: ChangeDetectorRef
 	) { }
 
 	ngOnInit() {
@@ -42,7 +36,7 @@ export class ResetPasswordComponent implements OnInit {
 			const token = params['token'];
 			console.log('ResetPasswordComponent: Token from queryParams:', token);
 
-			if (token && this.tokenStatus === TokenStatus.Validating) {
+			if (token && this.tokenStatus === 'validating') {
 				console.log('ResetPasswordComponent: Validating token...');
 				this.accountService.validateResetToken(token)
 					.pipe(first())
@@ -50,19 +44,22 @@ export class ResetPasswordComponent implements OnInit {
 						next: () => {
 							console.log('ResetPasswordComponent: Token validation successful');
 							this.token = token;
-							this.tokenStatus = TokenStatus.Valid;
+							this.tokenStatus = 'valid';
+							this.cd.detectChanges(); // Force UI update
 
 							// Temporarily disabled to prevent state reset
 							// this.router.navigate([], { relativeTo: this.route, replaceUrl: true, queryParams: {} });
 						},
 						error: (error) => {
 							console.error('ResetPasswordComponent: Token validation failed', error);
-							this.tokenStatus = TokenStatus.Invalid;
+							this.tokenStatus = 'invalid';
+							this.cd.detectChanges(); // Force UI update
 						}
 					});
-			} else if (!token && this.tokenStatus === TokenStatus.Validating) {
+			} else if (!token && this.tokenStatus === 'validating') {
 				console.log('ResetPasswordComponent: No token found, setting status to Invalid');
-				this.tokenStatus = TokenStatus.Invalid;
+				this.tokenStatus = 'invalid';
+				this.cd.detectChanges(); // Force UI update
 			}
 		});
 	}
