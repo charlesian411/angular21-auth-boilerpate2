@@ -30,6 +30,7 @@ export class ResetPasswordComponent implements OnInit {
 	) { }
 
 	ngOnInit() {
+		console.log('ResetPasswordComponent: ngOnInit');
 		this.form = this.formBuilder.group({
 			password: ['', [Validators.required, Validators.minLength(6)]],
 			confirmPassword: ['', Validators.required],
@@ -39,22 +40,28 @@ export class ResetPasswordComponent implements OnInit {
 
 		this.route.queryParams.subscribe(params => {
 			const token = params['token'];
+			console.log('ResetPasswordComponent: Token from queryParams:', token);
+
 			if (token && this.tokenStatus === TokenStatus.Validating) {
+				console.log('ResetPasswordComponent: Validating token...');
 				this.accountService.validateResetToken(token)
 					.pipe(first())
 					.subscribe({
 						next: () => {
+							console.log('ResetPasswordComponent: Token validation successful');
 							this.token = token;
 							this.tokenStatus = TokenStatus.Valid;
 
-							// remove token from url to prevent http referer leakage
-							this.router.navigate([], { relativeTo: this.route, replaceUrl: true, queryParams: {} });
+							// Temporarily disabled to prevent state reset
+							// this.router.navigate([], { relativeTo: this.route, replaceUrl: true, queryParams: {} });
 						},
-						error: () => {
+						error: (error) => {
+							console.error('ResetPasswordComponent: Token validation failed', error);
 							this.tokenStatus = TokenStatus.Invalid;
 						}
 					});
 			} else if (!token && this.tokenStatus === TokenStatus.Validating) {
+				console.log('ResetPasswordComponent: No token found, setting status to Invalid');
 				this.tokenStatus = TokenStatus.Invalid;
 			}
 		});
