@@ -190,7 +190,7 @@ export class FakeBackendInterceptor implements HttpInterceptor {
 				`, { autoClose: false });
 			}, 1000);
 
-			return ok();
+			return ok({ resetToken: account.resetToken });
 		}
 
 		function validateResetToken() {
