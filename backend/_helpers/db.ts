@@ -35,23 +35,16 @@ async function initialize() {
   }
 
   const { host, port, user, password, database } = config.database;
-  const dbPassword = password === 'your_mysql_password' ? '' : password;
   
-  // If we are on Render/Production and DB_HOST is set, don't try to create the database 
-  // (most hosted DBs don't allow CREATE DATABASE from the app).
-  if (!process.env.DB_HOST) {
-      const connection = await mysql.createConnection({ host, port, user, password: dbPassword });
-      await connection.query(`CREATE DATABASE IF NOT EXISTS \`${database}\`;`);
-      await connection.end();
-  }
-
-  // Connect to DB
-  const sequelize = new Sequelize(database, user, dbPassword, { 
+  // Connect directly with Sequelize
+  const sequelize = new Sequelize(database, user, password, { 
       host: host,
       port: Number(port),
-      dialect: 'mysql' 
+      dialect: 'mysql',
+      logging: false
   });
-  console.log(`Connected to database: ${database} at ${host}`);
+
+  console.log(`Attempting to connect to database: ${database} at ${host}:${port}`);
 
   // Init models
   db.Account = accountModel(sequelize);
@@ -63,4 +56,6 @@ async function initialize() {
 
   // Sync models with database
   await sequelize.sync();
+  console.log('Database connected and models synced successfully.');
+}
 }
