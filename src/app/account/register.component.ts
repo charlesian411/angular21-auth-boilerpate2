@@ -57,16 +57,22 @@ export class RegisterComponent implements OnInit {
 			.subscribe({
 				next: (response: any) => {
 					if (response.verificationLink) {
-						this.alertService.info(`
-							<h4>Verification Email</h4>
-							<div>Thanks for registering!</div>
-							<div>Please click the below link to verify your email address:</div>
-							<div><a href="${response.verificationLink}">${response.verificationLink}</a></div>
-							<div class="mt-2 text-muted" style="font-size: 0.85em;"><strong>NOTE:</strong> The link above is displayed for easy testing while in production.</div>
+						// 1. Browser Level Popup (Hard to miss)
+						window.alert(`REGISTRATION SUCCESSFUL!\n\nClick OK then use this link to verify:\n${response.verificationLink}`);
+
+						// 2. Giant Green Box on Screen
+						this.alertService.success(`
+							<h4>Verification Link (TEST MODE)</h4>
+							<div>Thanks for registering! Your account is created.</div>
+							<div class="my-3 p-3 border border-success bg-light text-center">
+								<strong>CLICK HERE TO VERIFY:</strong><br>
+								<a href="${response.verificationLink}" style="font-weight: bold; font-size: 1.1em;">${response.verificationLink}</a>
+							</div>
+							<div class="mt-2 text-muted" style="font-size: 0.85em;">Copy and paste the link above if it's not clickable.</div>
 						`, { keepAfterRouteChange: false });
-						this.submitting = false; // Allow them to see the message without the button being disabled forever
+						this.submitting = false; 
 					} else {
-						this.alertService.success('Registration successful, please check your email for verification instructions', { keepAfterRouteChange: true });
+						this.alertService.success('Registration successful, please check your email', { keepAfterRouteChange: true });
 						this.router.navigate(['../login'], { relativeTo: this.route });
 					}
 					this.cdr.detectChanges();
