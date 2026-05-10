@@ -16,6 +16,7 @@ try {
             tls: {
                 rejectUnauthorized: false
             },
+            ignoreTLS: true, // Try to bypass handshake issues
             greetingTimeout: 30000,
             connectionTimeout: 30000,
             debug: true,
@@ -25,6 +26,14 @@ try {
 }
 
 export default async function sendEmail({ to, subject, html, from = config.emailFrom }: any) {
+  // LOG THE EMAIL CONTENT SO THE USER CAN SEE IT IN RENDER LOGS EVEN IF SMTP FAILS
+  console.log('--- EMAIL CONTENT START ---');
+  console.log(`TO: ${to}`);
+  console.log(`SUBJECT: ${subject}`);
+  console.log('CONTENT (HTML):');
+  console.log(html);
+  console.log('--- EMAIL CONTENT END ---');
+
   const transporter = nodemailer.createTransport(config.smtpOptions);
   await transporter.sendMail({ from, to, subject, html });
 }
