@@ -27,6 +27,13 @@ initialize().catch((err: any) => {
 });
 
 async function initialize() {
+  console.log('Initializing database connection...');
+  
+  if (!config.database || !config.database.host) {
+      console.error('ERROR: Database configuration is missing. Please set DB_HOST, DB_USER, etc. in Render Environment variables.');
+      process.exit(1);
+  }
+
   const { host, port, user, password, database } = config.database;
   const dbPassword = password === 'your_mysql_password' ? '' : password;
   
@@ -40,6 +47,7 @@ async function initialize() {
 
   // Connect to DB
   const sequelize = new Sequelize(database, user, dbPassword, { dialect: 'mysql' });
+  console.log(`Connected to database: ${database} at ${host}`);
 
   // Init models
   db.Account = accountModel(sequelize);
