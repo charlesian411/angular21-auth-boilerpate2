@@ -58,4 +58,3 @@ async function initialize() {
   await sequelize.sync();
   console.log('Database connected and models synced successfully.');
 }
-}
