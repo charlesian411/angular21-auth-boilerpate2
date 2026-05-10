@@ -3,27 +3,44 @@ let config: any;
 try {
     config = require('../config.json');
 } catch (e) {
-    config = {
-        emailFrom: process.env.EMAIL_FROM,
-        smtpOptions: {
-            host: process.env.SMTP_HOST,
-            port: Number(process.env.SMTP_PORT) || 587,
-            secure: Number(process.env.SMTP_PORT) === 465,
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS
-            },
-            tls: {
-                rejectUnauthorized: false
-            },
-            ignoreTLS: true, // Try to bypass handshake issues
-            greetingTimeout: 30000,
-            connectionTimeout: 30000,
-            debug: true,
-            logger: true
+    config = {};
+}
+
+// Override with environment variables
+config.emailFrom = process.env.EMAIL_FROM || config.emailFrom;
+
+if (process.env.SENDGRID_API_KEY) {
+    // USE SENDGRID SMTP
+    config.smtpOptions = {
+        host: 'smtp.sendgrid.net',
+        port: 587,
+        auth: {
+            user: 'apikey',
+            pass: process.env.SENDGRID_API_KEY
+        }
+    };
+} else {
+    // USE ETHEREAL OR OTHER SMTP
+    config.smtpOptions = config.smtpOptions || {
+        host: process.env.SMTP_HOST,
+        port: Number(process.env.SMTP_PORT) || 587,
+        secure: Number(process.env.SMTP_PORT) === 465,
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS
         }
     };
 }
+
+// Add standard production options to smtpOptions
+config.smtpOptions = {
+    ...config.smtpOptions,
+    tls: { rejectUnauthorized: false },
+    greetingTimeout: 30000,
+    connectionTimeout: 30000,
+    debug: true,
+    logger: true
+};
 
 export default async function sendEmail({ to, subject, html, from = config.emailFrom }: any) {
   // LOG THE EMAIL CONTENT SO THE USER CAN SEE IT IN RENDER LOGS EVEN IF SMTP FAILS
