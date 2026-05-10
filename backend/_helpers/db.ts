@@ -23,7 +23,7 @@ const db: any = {};
 export default db;
 
 initialize().catch((err: any) => {
-  console.error('Database initialization failed:', err.message);
+  console.error('Database initialization failed:', err);
 });
 
 async function initialize() {
@@ -46,7 +46,11 @@ async function initialize() {
   }
 
   // Connect to DB
-  const sequelize = new Sequelize(database, user, dbPassword, { dialect: 'mysql' });
+  const sequelize = new Sequelize(database, user, dbPassword, { 
+      host: host,
+      port: Number(port),
+      dialect: 'mysql' 
+  });
   console.log(`Connected to database: ${database} at ${host}`);
 
   // Init models
