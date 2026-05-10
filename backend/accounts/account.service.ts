@@ -80,7 +80,14 @@ async function register(params: any, origin: any) {
   account.passwordHash = await hash(params.password);
 
   await account.save();
-  await sendVerificationEmail(account, origin);
+  console.log(`User registered: ${account.email}. Sending verification email...`);
+  try {
+      await sendVerificationEmail(account, origin);
+      console.log(`Verification email sent to ${account.email}`);
+  } catch (emailError: any) {
+      console.error(`Failed to send email to ${account.email}:`, emailError.message);
+  }
+  return { message: 'Registration successful, please check your email for verification instructions' };
 }
 
 async function verifyEmail({ token }: any) {
