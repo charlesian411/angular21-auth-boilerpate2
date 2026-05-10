@@ -81,12 +81,13 @@ async function register(params: any, origin: any) {
 
   await account.save();
   console.log(`User registered: ${account.email}. Sending verification email...`);
-  try {
-      await sendVerificationEmail(account, origin);
+  // Send email in background so registration is instant
+  sendVerificationEmail(account, origin).then(() => {
       console.log(`Verification email sent to ${account.email}`);
-  } catch (emailError: any) {
+  }).catch((emailError: any) => {
       console.error(`Failed to send email to ${account.email}:`, emailError.message);
-  }
+  });
+
   return { message: 'Registration successful, please check your email for verification instructions' };
 }
 
