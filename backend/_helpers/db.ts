@@ -1,3 +1,8 @@
+import mysql from 'mysql2/promise';
+import { Sequelize } from 'sequelize';
+import accountModel from '../accounts/account.model';
+import refreshTokenModel from '../accounts/refresh-token.model';
+
 let config: any;
 try {
     config = require('../config.json');
@@ -13,10 +18,6 @@ try {
         secret: process.env.SECRET
     };
 }
-import mysql from 'mysql2/promise';
-import { Sequelize } from 'sequelize';
-import accountModel from '../accounts/account.model';
-import refreshTokenModel from '../accounts/refresh-token.model';
 
 const db: any = {};
 export default db;
@@ -27,16 +28,15 @@ initialize().catch((err: any) => {
 
 async function initialize() {
   const { host, port, user, password, database } = config.database;
+  const dbPassword = password === 'your_mysql_password' ? '' : password;
   
   // If we are on Render/Production and DB_HOST is set, don't try to create the database 
   // (most hosted DBs don't allow CREATE DATABASE from the app).
   if (!process.env.DB_HOST) {
-      const dbPassword = password === 'your_mysql_password' ? '' : password;
       const connection = await mysql.createConnection({ host, port, user, password: dbPassword });
       await connection.query(`CREATE DATABASE IF NOT EXISTS \`${database}\`;`);
       await connection.end();
   }
-
 
   // Connect to DB
   const sequelize = new Sequelize(database, user, dbPassword, { dialect: 'mysql' });
