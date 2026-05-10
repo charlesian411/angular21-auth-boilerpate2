@@ -16,6 +16,8 @@ try {
             tls: {
                 rejectUnauthorized: false
             },
+            greetingTimeout: 30000,
+            connectionTimeout: 30000,
             debug: true,
             logger: true
         }
