@@ -63,12 +63,13 @@ export class RegisterComponent implements OnInit {
 							<div>Please click the below link to verify your email address:</div>
 							<div><a href="${response.verificationLink}">${response.verificationLink}</a></div>
 							<div class="mt-2 text-muted" style="font-size: 0.85em;"><strong>NOTE:</strong> The link above is displayed for easy testing while in production.</div>
-						`, { keepAfterRouteChange: true });
+						`, { keepAfterRouteChange: false });
+						this.submitting = false; // Allow them to see the message without the button being disabled forever
 					} else {
 						this.alertService.success('Registration successful, please check your email for verification instructions', { keepAfterRouteChange: true });
+						this.router.navigate(['../login'], { relativeTo: this.route });
 					}
 					this.cdr.detectChanges();
-					this.router.navigate(['../login'], { relativeTo: this.route });
 				},
 				error: error => {
 					this.alertService.error(error);
