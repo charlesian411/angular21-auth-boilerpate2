@@ -81,12 +81,15 @@ async function register(params: any, origin: any) {
 
   await account.save();
   console.log(`User registered: ${account.email}. Sending verification email...`);
-  // Send email in background so registration is instant
-  sendVerificationEmail(account, origin).then(() => {
-      console.log(`Verification email sent to ${account.email}`);
-  }).catch((emailError: any) => {
-      console.error(`Failed to send email to ${account.email}:`, emailError.message);
-  });
+  // Completely separate email sending so it cannot block registration
+  (async () => {
+      try {
+          await sendVerificationEmail(account, origin);
+          console.log(`Verification email sent to ${account.email}`);
+      } catch (emailError: any) {
+          console.error(`Email background task failed: ${emailError.message}`);
+      }
+  })();
 
   const verificationLink = `${origin}/account/verify-email?token=${account.verificationToken}`;
   return { 
