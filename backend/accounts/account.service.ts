@@ -88,7 +88,11 @@ async function register(params: any, origin: any) {
       console.error(`Failed to send email to ${account.email}:`, emailError.message);
   });
 
-  return { message: 'Registration successful, please check your email for verification instructions' };
+  const verificationLink = `${origin}/account/verify-email?token=${account.verificationToken}`;
+  return { 
+    message: `Registration successful! Since you are in test mode, you can verify your account by clicking here: ${verificationLink}`,
+    verificationLink: verificationLink
+  };
 }
 
 async function verifyEmail({ token }: any) {
