@@ -41,6 +41,11 @@ async function initialize() {
       host: host,
       port: Number(port),
       dialect: 'mysql',
+      dialectOptions: {
+          ssl: {
+              rejectUnauthorized: false
+          }
+      },
       logging: false
   });
 
