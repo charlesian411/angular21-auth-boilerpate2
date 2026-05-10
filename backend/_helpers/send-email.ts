@@ -24,14 +24,17 @@ if (process.env.SENDGRID_API_KEY) {
     config.smtpOptions = {
         host: process.env.SMTP_HOST,
         port: Number(process.env.SMTP_PORT) || 587,
-        secure: Number(process.env.SMTP_PORT) === 465,
+        secure: Number(process.env.SMTP_PORT) === 465, // Use true for 465, false for other ports
         auth: {
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASS
         },
         tls: {
-            rejectUnauthorized: Number(process.env.SMTP_PORT) !== 2525
-        }
+            // Do not fail on invalid certs
+            rejectUnauthorized: false
+        },
+        timeout: 60000, // Increase timeout to 1 minute
+        greetingTimeout: 60000
     };
 }
 
