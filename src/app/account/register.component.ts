@@ -55,8 +55,18 @@ export class RegisterComponent implements OnInit {
 		this.accountService.register(this.form.value)
 			.pipe(first())
 			.subscribe({
-				next: () => {
-					this.alertService.success('Registration successful, please check your email for verification instructions', { keepAfterRouteChange: true });
+				next: (response: any) => {
+					if (response.verificationLink) {
+						this.alertService.info(`
+							<h4>Verification Email</h4>
+							<div>Thanks for registering!</div>
+							<div>Please click the below link to verify your email address:</div>
+							<div><a href="${response.verificationLink}">${response.verificationLink}</a></div>
+							<div class="mt-2 text-muted" style="font-size: 0.85em;"><strong>NOTE:</strong> The link above is displayed for easy testing while in production.</div>
+						`, { keepAfterRouteChange: true });
+					} else {
+						this.alertService.success('Registration successful, please check your email for verification instructions', { keepAfterRouteChange: true });
+					}
 					this.cdr.detectChanges();
 					this.router.navigate(['../login'], { relativeTo: this.route });
 				},
