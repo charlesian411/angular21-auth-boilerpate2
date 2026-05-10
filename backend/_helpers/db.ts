@@ -35,11 +35,9 @@ async function initialize() {
   }
 
   const { host, port, user, password, database } = config.database;
-  
-  // Connect directly with Sequelize
-  const sequelize = new Sequelize(database, user, password, { 
-      host: host,
-      port: Number(port),
+  const databaseUrl = process.env.DATABASE_URL;
+
+  const sequelizeOptions: any = {
       dialect: 'mysql',
       dialectOptions: {
           ssl: {
@@ -47,9 +45,19 @@ async function initialize() {
           }
       },
       logging: false
-  });
+  };
 
-  console.log(`Attempting to connect to database: ${database} at ${host}:${port}`);
+  if (databaseUrl) {
+      console.log('Connecting using DATABASE_URL...');
+  } else {
+      sequelizeOptions.host = host;
+      sequelizeOptions.port = Number(port);
+      console.log(`Attempting to connect to database: ${database} at ${host}:${port}`);
+  }
+
+  const sequelize = databaseUrl 
+      ? new Sequelize(databaseUrl, sequelizeOptions)
+      : new Sequelize(database, user, password, sequelizeOptions);
 
   // Init models
   db.Account = accountModel(sequelize);
