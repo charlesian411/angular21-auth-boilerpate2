@@ -1,4 +1,9 @@
-import config from '../config.json';
+let config: any;
+try {
+    config = require('../config.json');
+} catch (e) {
+    config = { secret: process.env.SECRET };
+}
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
