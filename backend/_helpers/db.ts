@@ -1,4 +1,18 @@
-import config from '../config.json';
+let config: any;
+try {
+    config = require('../config.json');
+} catch (e) {
+    config = {
+        database: {
+            host: process.env.DB_HOST,
+            port: process.env.DB_PORT || 3306,
+            user: process.env.DB_USER,
+            password: process.env.DB_PASSWORD,
+            database: process.env.DB_NAME
+        },
+        secret: process.env.SECRET
+    };
+}
 import mysql from 'mysql2/promise';
 import { Sequelize } from 'sequelize';
 import accountModel from '../accounts/account.model';
@@ -13,14 +27,16 @@ initialize().catch((err: any) => {
 
 async function initialize() {
   const { host, port, user, password, database } = config.database;
-  // Allow local development defaults: if tutorial placeholder remains, try empty password.
-  const dbPassword = password === 'your_mysql_password' ? '' : password;
+  
+  // If we are on Render/Production and DB_HOST is set, don't try to create the database 
+  // (most hosted DBs don't allow CREATE DATABASE from the app).
+  if (!process.env.DB_HOST) {
+      const dbPassword = password === 'your_mysql_password' ? '' : password;
+      const connection = await mysql.createConnection({ host, port, user, password: dbPassword });
+      await connection.query(`CREATE DATABASE IF NOT EXISTS \`${database}\`;`);
+      await connection.end();
+  }
 
-  const connection = await mysql.createConnection({ host, port, user, password: dbPassword });
-
-  // Create DB if it doesn't exist
-  await connection.query(`CREATE DATABASE IF NOT EXISTS \`${database}\`;`);
-  await connection.end();
 
   // Connect to DB
   const sequelize = new Sequelize(database, user, dbPassword, { dialect: 'mysql' });

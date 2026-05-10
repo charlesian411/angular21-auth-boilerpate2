@@ -1,5 +1,10 @@
 import jwt from 'express-jwt';
-import config from '../config.json';
+let config: any;
+try {
+    config = require('../config.json');
+} catch (e) {
+    config = { secret: process.env.SECRET };
+}
 import db from '../_helpers/db';
 
 const { secret } = config;
