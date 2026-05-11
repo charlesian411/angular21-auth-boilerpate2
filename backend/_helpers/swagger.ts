@@ -2,7 +2,6 @@ import express from 'express';
 const router = express.Router();
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
-
 import path from 'path';
 
 let swaggerDocument: any;

@@ -1,37 +1,33 @@
-# Dependencies
-node_modules/
 
-# Build output
-dist/
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+
+# TypeScript
+*.tsbuildinfo
 
 # Logs
 logs/
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
 
-# Tests
-coverage/
-.nyc_output/
-
-# Runtime data
-pids/
-*.pid
-*.pid.lock
-
-# Environment and local secrets
-.env
-.env.*
-!.env.example
-config.json
-
-# TypeScript cache
-*.tsbuildinfo
-
-# Editor/OS files
-.vscode/
-.idea/
+# OS
 .DS_Store
 Thumbs.db
+
+# Environment
+.env
+.env.*
+
+# Misc
+*.swp
+*.swo
+
+# VSCode
+.vscode/
+
+# Build output
+dist/
+build/
+

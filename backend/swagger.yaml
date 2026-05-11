@@ -81,7 +81,6 @@ paths:
                   message:
                     type: string
                     example: "Email or password is incorrect"
-
   /accounts/refresh-token:
     post:
       summary: Use a refresh token to generate a new JWT token and a new refresh token
@@ -145,7 +144,6 @@ paths:
                   message:
                     type: string
                     example: "Invalid token"
-
   /accounts/revoke-token:
     post:
       summary: Revoke a refresh token
@@ -192,7 +190,6 @@ paths:
                     example: "Invalid token"
         "401":
           $ref: "#/components/responses/UnauthorizedError"
-
   /accounts/register:
     post:
       summary: Register a new user account and send a verification email
@@ -244,7 +241,6 @@ paths:
                   message:
                     type: string
                     example: "Registration successful, please check your email for verification instructions"
-
   /accounts/verify-email:
     post:
       summary: Verify a new account with a verification token received by email after registration
@@ -282,7 +278,6 @@ paths:
                   message:
                     type: string
                     example: "Verification failed"
-
   /accounts/forgot-password:
     post:
       summary: Submit email address to reset the password on an account
@@ -310,7 +305,6 @@ paths:
                   message:
                     type: string
                     example: "Please check your email for password reset instructions"
-
   /accounts/validate-reset-token:
     post:
       summary: Validate the reset password token received by email after submitting to the /accounts/forgot-password route
@@ -348,7 +342,6 @@ paths:
                   message:
                     type: string
                     example: "Invalid token"
-
   /accounts/reset-password:
     post:
       summary: Reset the password for an account
@@ -394,7 +387,6 @@ paths:
                   message:
                     type: string
                     example: "Invalid token"
-
   /accounts:
     get:
       summary: Get a list of all accounts
@@ -521,7 +513,6 @@ paths:
                     example: "Email 'jason@example.com' is already registered"
         "401":
           $ref: "#/components/responses/UnauthorizedError"
-
   /accounts/{id}:
     parameters:
       - in: path

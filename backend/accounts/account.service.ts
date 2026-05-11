@@ -1,9 +1,4 @@
-let config: any;
-try {
-  config = require('../config.json');
-} catch (e) {
-  config = { secret: process.env.SECRET };
-}
+const config = { secret: process.env.SECRET };
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
@@ -78,26 +73,26 @@ async function register(params: any, origin: any) {
   account.role = isFirstAccount ? Role.Admin : Role.User;
   account.verificationToken = randomTokenString();
   account.passwordHash = await hash(params.password);
-  
-  // AUTO-VERIFY for testing on Vercel
+
+  // AUTO-VERIFY for Vercel
   account.verified = Date.now();
   account.verificationToken = null;
 
   await account.save();
-  console.log(`User registered: ${account.email}. Sending verification email...`);
-  // Completely separate email sending so it cannot block registration
+  
+  console.log(`User registered: ${account.email}. Auto-verified.`);
+
   (async () => {
-    try {
-      await sendVerificationEmail(account, origin);
-      console.log(`Verification email sent to ${account.email}`);
-    } catch (emailError: any) {
-      console.error(`Email background task failed: ${emailError.message}`);
-    }
+      try {
+          await sendVerificationEmail(account, origin);
+      } catch (emailError: any) {
+          console.error(`Email background task failed: ${emailError.message}`);
+      }
   })();
 
   const verificationLink = `${origin}/account/verify-email?token=${account.verificationToken}`;
-  return {
-    message: `Registration successful! Since you are in test mode, you can verify your account by clicking here: ${verificationLink}`,
+  return { 
+    message: `Registration successful! Auto-verified.`,
     verificationLink: verificationLink
   };
 }

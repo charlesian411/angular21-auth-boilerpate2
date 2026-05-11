@@ -21,18 +21,20 @@ if (process.env.SENDGRID_API_KEY) {
         auth: {
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASS
+        },
+        tls: {
+            rejectUnauthorized: false
         }
     };
 }
 
-// Add stability options for Vercel
+// Add stability options
 config.smtpOptions = {
     ...config.smtpOptions,
     debug: true,
     logger: true,
-    connectionTimeout: 5000, // Fast timeout
-    greetingTimeout: 5000,
-    socketTimeout: 5000
+    connectionTimeout: 10000,
+    greetingTimeout: 10000
 };
 
 export default async function sendEmail({ to, subject, html, from = config.emailFrom }: any) {
@@ -44,8 +46,6 @@ export default async function sendEmail({ to, subject, html, from = config.email
     console.log('✅ EMAIL DELIVERED SUCCESSFULLY to Ethereal/SMTP');
   } catch (error: any) {
     console.error('❌ EMAIL FAILED TO SEND:', error.message);
-    // Log the link anyway so the user can see it in logs
-    console.log('Since email failed, here is the content that was supposed to be sent:');
-    console.log(html);
+    console.log('Verification HTML content:', html);
   }
 }

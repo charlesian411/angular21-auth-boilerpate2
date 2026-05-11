@@ -1,14 +1,7 @@
 import jwt from 'express-jwt';
 import db from '../_helpers/db';
 
-let config: any;
-try {
-    config = require('../config.json');
-} catch (e) {
-    config = { secret: process.env.SECRET };
-}
-
-const { secret } = config;
+const secret = process.env.SECRET || 'secret';
 
 export default function authorize(roles: any = []) {
   if (typeof roles === 'string') {

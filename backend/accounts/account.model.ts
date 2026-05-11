@@ -18,16 +18,14 @@ export default function model(sequelize: any) {
     updated: { type: DataTypes.DATE },
     isVerified: {
       type: DataTypes.VIRTUAL,
-      get() {
-        return !!(this.verified || this.passwordReset);
-      }
+      get() { return !!(this.verified || this.passwordReset); }
     }
   };
 
   const options = {
     timestamps: false,
     defaultScope: { attributes: { exclude: ['passwordHash'] } },
-    scopes: { withHash: { attributes: {} } }
+    scopes: { withHash: { attributes: {}, } }
   };
 
   return sequelize.define('account', attributes, options);
