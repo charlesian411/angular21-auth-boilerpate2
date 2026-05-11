@@ -1,4 +1,5 @@
 import 'mysql2';
+console.log('BACKEND STARTING - VERSION: 4.0 (CLEANUP)');
 import express from 'express';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
