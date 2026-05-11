@@ -38,7 +38,14 @@ async function initialize() {
         dialectOptions: {
             ssl: {
                 rejectUnauthorized: false
-            }
+            },
+            connectTimeout: 60000 // 60 seconds
+        },
+        pool: {
+            max: 5,
+            min: 0,
+            acquire: 30000,
+            idle: 10000
         },
         logging: false
     };
