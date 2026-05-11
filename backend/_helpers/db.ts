@@ -23,51 +23,52 @@ const db: any = {};
 export default db;
 
 initialize().catch((err: any) => {
-  console.error('Database initialization failed:', err);
+    console.error('Database initialization failed:', err);
 });
 
 async function initialize() {
-  console.log('Initializing database connection...');
-  
-  if (!config.database || !config.database.host) {
-      console.error('ERROR: Database configuration is missing. Please set DB_HOST, DB_USER, etc. in Render Environment variables.');
-      process.exit(1);
-  }
+    console.log('Initializing database connection...');
 
-  const { host, port, user, password, database } = config.database;
-  const databaseUrl = process.env.DATABASE_URL;
+    const databaseUrl = process.env.DATABASE_URL;
 
-  const sequelizeOptions: any = {
-      dialect: 'mysql',
-      dialectOptions: {
-          ssl: {
-              rejectUnauthorized: false
-          }
-      },
-      logging: false
-  };
+    if (!databaseUrl && (!config.database || !config.database.host)) {
+        console.error('ERROR: Database configuration is missing. Please set DATABASE_URL or DB_HOST in environment variables.');
+        return; // Don't exit process in Vercel
+    }
 
-  if (databaseUrl) {
-      console.log('Connecting using DATABASE_URL...');
-  } else {
-      sequelizeOptions.host = host;
-      sequelizeOptions.port = Number(port);
-      console.log(`Attempting to connect to database: ${database} at ${host}:${port}`);
-  }
+    const { host, port, user, password, database } = config.database || {};
 
-  const sequelize = databaseUrl 
-      ? new Sequelize(databaseUrl, sequelizeOptions)
-      : new Sequelize(database, user, password, sequelizeOptions);
+    const sequelizeOptions: any = {
+        dialect: 'mysql',
+        dialectOptions: {
+            ssl: {
+                rejectUnauthorized: false
+            }
+        },
+        logging: false
+    };
 
-  // Init models
-  db.Account = accountModel(sequelize);
-  db.RefreshToken = refreshTokenModel(sequelize);
+    if (databaseUrl) {
+        console.log('Connecting using DATABASE_URL...');
+    } else {
+        sequelizeOptions.host = host;
+        sequelizeOptions.port = Number(port);
+        console.log(`Attempting to connect to database: ${database} at ${host}:${port}`);
+    }
 
-  // Define relationships
-  db.Account.hasMany(db.RefreshToken, { onDelete: 'CASCADE' });
-  db.RefreshToken.belongsTo(db.Account);
+    const sequelize = databaseUrl
+        ? new Sequelize(databaseUrl, sequelizeOptions)
+        : new Sequelize(database, user, password, sequelizeOptions);
 
-  // Sync models with database
-  await sequelize.sync();
-  console.log('Database connected and models synced successfully.');
+    // Init models
+    db.Account = accountModel(sequelize);
+    db.RefreshToken = refreshTokenModel(sequelize);
+
+    // Define relationships
+    db.Account.hasMany(db.RefreshToken, { onDelete: 'CASCADE' });
+    db.RefreshToken.belongsTo(db.Account);
+
+    // Sync models with database
+    await sequelize.sync();
+    console.log('Database connected and models synced successfully.');
 }
