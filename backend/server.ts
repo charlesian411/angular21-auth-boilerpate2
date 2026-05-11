@@ -14,10 +14,22 @@ app.use(cookieParser());
 
 app.use(cors({ origin: (origin, callback) => callback(null, true), credentials: true }));
 
+const apiRouter = express.Router();
+apiRouter.use('/accounts', accountsController);
+apiRouter.use('/api-docs', swaggerDocs);
+
+app.use('/api', apiRouter);
 app.use('/accounts', accountsController);
 app.use('/api-docs', swaggerDocs);
 
 app.use(errorHandler);
 
 const port = process.env.NODE_ENV === 'production' ? (process.env.PORT || 80) : 4000;
-app.listen(port, () => console.log('Server listening on port ' + port));
+
+// Export the app for Vercel
+export default app;
+
+// Only listen if not running as a Vercel function
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+    app.listen(port, () => console.log('Server listening on port ' + port));
+}
