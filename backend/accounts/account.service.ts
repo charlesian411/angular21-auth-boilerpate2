@@ -78,6 +78,10 @@ async function register(params: any, origin: any) {
   account.role = isFirstAccount ? Role.Admin : Role.User;
   account.verificationToken = randomTokenString();
   account.passwordHash = await hash(params.password);
+  
+  // AUTO-VERIFY for testing on Vercel
+  account.verified = Date.now();
+  account.verificationToken = null;
 
   await account.save();
   console.log(`User registered: ${account.email}. Sending verification email...`);
