@@ -1,4 +1,4 @@
-# Rico John Paul L. Estrera &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; BSIT – 3D
+
 
 ---
 
@@ -74,7 +74,7 @@ Next, reconnect or select the same GitHub repository that contains your frontend
 After selecting the repository, enter the name of your frontend website. In my case, I named it:
 
 ```
-ipt-2026-frontend-estrera
+ipt-2026-frontend-barral
 ```
 
 Then, configure the build settings and deploy the frontend.
