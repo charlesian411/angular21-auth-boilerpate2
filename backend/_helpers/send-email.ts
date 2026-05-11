@@ -16,25 +16,23 @@ if (process.env.SENDGRID_API_KEY) {
 } else {
     config.smtpOptions = {
         host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT) || 587,
-        secure: Number(process.env.SMTP_PORT) === 465,
+        port: 465,
+        secure: true, // Use SSL
         auth: {
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASS
-        },
-        tls: {
-            rejectUnauthorized: false
         }
     };
 }
 
-// Add stability options
+// Add stability options for Vercel
 config.smtpOptions = {
     ...config.smtpOptions,
     debug: true,
     logger: true,
-    connectionTimeout: 10000,
-    greetingTimeout: 10000
+    connectionTimeout: 5000, // Fast timeout
+    greetingTimeout: 5000,
+    socketTimeout: 5000
 };
 
 export default async function sendEmail({ to, subject, html, from = config.emailFrom }: any) {
