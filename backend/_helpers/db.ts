@@ -3,21 +3,16 @@ import { Sequelize } from 'sequelize';
 import accountModel from '../accounts/account.model';
 import refreshTokenModel from '../accounts/refresh-token.model';
 
-let config: any;
-try {
-    config = require('../config.json');
-} catch (e) {
-    config = {
-        database: {
-            host: process.env.DB_HOST,
-            port: process.env.DB_PORT || 3306,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_NAME
-        },
-        secret: process.env.SECRET
-    };
-}
+const config = {
+    database: {
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT || 3306,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME
+    },
+    secret: process.env.SECRET
+};
 
 const db: any = {};
 export default db;
