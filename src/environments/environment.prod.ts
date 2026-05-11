@@ -1,4 +1,4 @@
 export const environment = {
 	production: true,
-	apiUrl: 'https://ipt-2026-backend-barral.vercel.app/api'
+	apiUrl: 'https://angular21-auth-boilerpate2-va6u.vercel.app/api'
 };
