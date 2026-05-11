@@ -18,7 +18,7 @@ app.use(cookieParser());
 app.use(cors({ origin: (origin, callback) => callback(null, true), credentials: true }));
 
 // api routes
-app.use('/api', accountsController); // Corrected for your project
+app.use('/api/accounts', accountsController); // Matches your frontend
 app.use('/accounts', accountsController);
 app.use('/api-docs', swaggerDocs);
 
