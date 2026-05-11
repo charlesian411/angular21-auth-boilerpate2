@@ -3,8 +3,17 @@ const router = express.Router();
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 
-const swaggerDocument = YAML.load('./swagger.yaml');
+import path from 'path';
 
-router.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+let swaggerDocument: any;
+try {
+    swaggerDocument = YAML.load(path.join(__dirname, '../swagger.yaml'));
+} catch (e) {
+    console.error('Could not load swagger.yaml, documentation will be disabled:', e);
+}
+
+if (swaggerDocument) {
+    router.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+}
 
 export default router;
