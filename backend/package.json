@@ -21,7 +21,7 @@
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.6.1",
     "nodemailer": "^6.9.7",
-    "resend": "^3.2.0",
+    "@sendgrid/mail": "^8.1.0",
     "sequelize": "^6.33.0",
     "swagger-ui-express": "^5.0.0",
     "yamljs": "^0.3.0"

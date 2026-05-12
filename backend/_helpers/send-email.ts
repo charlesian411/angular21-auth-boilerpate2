@@ -1,32 +1,32 @@
 import nodemailer from 'nodemailer';
-import { Resend } from 'resend';
+import sgMail from '@sendgrid/mail';
 
 const config: any = {
-    emailFrom: process.env.EMAIL_FROM || 'onboarding@resend.dev',
-    resendApiKey: process.env.RESEND_API_KEY
+    emailFrom: process.env.EMAIL_FROM,
+    sendgridApiKey: process.env.SENDGRID_API_KEY
 };
 
-let resend: Resend | null = null;
-if (config.resendApiKey) {
-    resend = new Resend(config.resendApiKey);
+// Initialize SendGrid if API Key is present
+if (config.sendgridApiKey) {
+    sgMail.setApiKey(config.sendgridApiKey);
 }
 
 export default async function sendEmail({ to, subject, html, from = config.emailFrom }: any) {
   console.log(`Attempting to send email to: ${to}`);
   
-  // OPTION A: USE RESEND HTTPS API (Most reliable for Vercel)
-  if (resend) {
+  // OPTION A: USE SENDGRID HTTPS API (SDK)
+  if (config.sendgridApiKey) {
       try {
-          await resend.emails.send({
-              from: from,
+          await sgMail.send({
               to: to,
+              from: from,
               subject: subject,
               html: html
           });
-          console.log('✅ EMAIL DELIVERED SUCCESSFULLY via Resend HTTPS API');
+          console.log('✅ EMAIL DELIVERED SUCCESSFULLY via SendGrid HTTPS SDK');
           return;
       } catch (error: any) {
-          console.error('❌ RESEND API ERROR:', error.message);
+          console.error('❌ SENDGRID SDK ERROR:', error.response?.body || error.message);
           // Fallback to SMTP or logging below...
       }
   }
