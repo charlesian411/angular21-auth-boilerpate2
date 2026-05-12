@@ -74,19 +74,18 @@ async function register(params: any, origin: any) {
   account.verificationToken = randomTokenString();
   account.passwordHash = await hash(params.password);
 
-  // AUTO-VERIFY for Vercel
-  account.verified = Date.now();
-  account.verificationToken = null;
-
-  await account.save();
-  
-  console.log(`User registered: ${account.email}. Auto-verified.`);
-
+  // Send verification email
   try {
       await sendVerificationEmail(account, origin);
   } catch (emailError: any) {
       console.error(`Email task failed: ${emailError.message}`);
   }
+
+  // Auto-verify for immediate login (but KEEP the token so the link works)
+  account.verified = Date.now();
+  await account.save();
+
+  console.log(`User registered: ${account.email}. Auto-verified.`);
 
   const verificationLink = `${origin}/account/verify-email?token=${account.verificationToken}`;
   return { 
