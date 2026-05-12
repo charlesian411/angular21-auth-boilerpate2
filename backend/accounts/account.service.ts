@@ -82,13 +82,11 @@ async function register(params: any, origin: any) {
   
   console.log(`User registered: ${account.email}. Auto-verified.`);
 
-  (async () => {
-      try {
-          await sendVerificationEmail(account, origin);
-      } catch (emailError: any) {
-          console.error(`Email background task failed: ${emailError.message}`);
-      }
-  })();
+  try {
+      await sendVerificationEmail(account, origin);
+  } catch (emailError: any) {
+      console.error(`Email task failed: ${emailError.message}`);
+  }
 
   const verificationLink = `${origin}/account/verify-email?token=${account.verificationToken}`;
   return { 
